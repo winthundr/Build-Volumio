@@ -287,6 +287,16 @@ case "$DEVICE" in
     check_os_release "armv7" "$VERSION" "$DEVICE"
     sh scripts/vszeroimage.sh -v "$VERSION" -p "$PATCH" -a armv7
     ;;
+  vim) echo 'Writing Khadas VIM Image File'
+    check_os_release "armv7" "$VERSION" "$DEVICE"
+# this will be changed to armv8 once the volumio packges have been re-compiled for aarch64
+    sh scripts/vimimage.sh -v "$VERSION" -p "$PATCH" -a armv7
+    ;;
+  vim2) echo 'Writing Khadas VIM2 Image File'
+    check_os_release "armv7" "$VERSION" "$DEVICE"
+# this will be changed to armv8 once the volumio packges have been re-compiled for aarch64
+    sh scripts/vim2image.sh -v "$VERSION" -p "$PATCH" -a armv7
+    ;;
   x86) echo 'Writing x86 Image File'
     check_os_release "x86" "$VERSION" "$DEVICE"
     sh scripts/x86image.sh -v "$VERSION" -p "$PATCH";
