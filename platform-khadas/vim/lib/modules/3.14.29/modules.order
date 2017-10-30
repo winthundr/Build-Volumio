@@ -8,14 +8,11 @@ kernel/arch/arm64/crypto/aes-neon-blk.ko
 kernel/fs/nfs_common/nfs_acl.ko
 kernel/fs/nfs/blocklayout/blocklayoutdriver.ko
 kernel/fs/reiserfs/reiserfs.ko
-kernel/fs/squashfs/squashfs.ko
 kernel/fs/hfsplus/hfsplus.ko
 kernel/fs/hfs/hfs.ko
 kernel/fs/ecryptfs/ecryptfs.ko
 kernel/fs/nfsd/nfsd.ko
 kernel/fs/ntfs/ntfs.ko
-kernel/fs/autofs4/autofs4.ko
-kernel/fs/fuse/fuse.ko
 kernel/fs/jfs/jfs.ko
 kernel/fs/xfs/xfs.ko
 kernel/fs/f2fs/f2fs.ko

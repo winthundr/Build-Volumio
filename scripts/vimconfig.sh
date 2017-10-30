@@ -16,9 +16,13 @@ tmpfs   /tmp                    tmpfs   defaults,noatime,mode=0755 0 0
 tmpfs   /dev/shm                tmpfs   defaults,nosuid,noexec,nodev        0 0
 " > /etc/fstab
 
+echo "#!/bin/sh -e
+/etc/hdmi.sh
+exit 0" > /etc/rc.local
+
 echo "Installing additonal packages"
 apt-get update
-apt-get -y install u-boot-tools liblircclient0 lirc fbset
+apt-get -y install u-boot-tools liblircclient0 lirc
 
 echo "Cleaning APT Cache and remove policy file"
 rm -f /var/lib/apt/lists/*archive*
@@ -53,18 +57,18 @@ rm -rf ${PATCH}
 fi
 rm /patch
 
-#echo "Installing winbind here, since it freezes networking"
-#apt-get update
-#apt-get install -y winbind libnss-winbind
+#echo "Changing to 'modules=dep'"
+#echo "(otherwise won't boot due to uInitrd 4MB limit)"
+#sed -i "s/MODULES=most/MODULES=dep/g" /etc/initramfs-tools/initramfs.conf
+
+echo "Installing winbind here, since it freezes networking"
+apt-get update
+apt-get install -y winbind libnss-winbind
 
 echo "Cleaning APT Cache and remove policy file"
 rm -f /var/lib/apt/lists/*archive*
 apt-get clean
 rm /usr/sbin/policy-rc.d
-
-#echo "Changing to 'modules=dep'"
-#echo "(otherwise won't boot due to uInitrd 4MB limit)"
-#sed -i "s/MODULES=most/MODULES=dep/g" /etc/initramfs-tools/initramfs.conf
 
 #First Boot operations
 echo "Signalling the init script to re-size the volumio data partition"
@@ -74,7 +78,7 @@ echo "Creating initramfs 'volumio.initrd'"
 mkinitramfs-custom.sh -o /tmp/initramfs-tmp
 
 echo "Creating uInitrd from 'volumio.initrd'"
-mkimage -A arm -O linux -T ramdisk -C none -a 0 -e 0 -n uInitrd -d /boot/volumio.initrd /boot/uInitrd
+mkimage -A arm64 -O linux -T ramdisk -C none -a 0 -e 0 -n uInitrd -d /boot/volumio.initrd /boot/uInitrd
 
 echo "Removing unnecessary /boot files"
-#rm /boot/volumio.initrd
+rm /boot/volumio.initrd

@@ -1,4 +1,2 @@
 # Device nodes to trigger on-demand module loading.
-autofs4 autofs c10:235
-fuse fuse c10:229
 dm_mod mapper/control c10:236

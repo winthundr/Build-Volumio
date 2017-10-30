@@ -3,16 +3,13 @@
 # Default build for Debian 32bit (to be changed to armv8)
 ARCH="armv7"
 
-while getopts ":v:p:a:" opt; do
+while getopts ":d:v:p:" opt; do
   case $opt in
     v)
       VERSION=$OPTARG
       ;;
     p)
       PATCH=$OPTARG
-      ;;
-    a)
-      ARCH=$OPTARG
       ;;
   esac
 done
@@ -30,8 +27,8 @@ echo "Creating Image File ${IMG_FILE} with $DISTRO rootfs"
 dd if=/dev/zero of=${IMG_FILE} bs=1M count=2800
 
 echo "Creating Image Bed"
-LOOP_DEV=`losetup -f --show ${IMG_FILE}`
-
+LOOP_DEV=`sudo losetup -f --show ${IMG_FILE}`
+# Note: leave the first 20Mb free for the firmware
 parted -s "${LOOP_DEV}" mklabel msdos
 parted -s "${LOOP_DEV}" mkpart primary fat32 1 64
 parted -s "${LOOP_DEV}" mkpart primary ext3 65 2500
@@ -74,7 +71,7 @@ else
 	echo "Clone all Khadas files from repo"
 #	git clone https://github.com/volumio/Platform-khadas.git platform-khadas
 	echo "Unpack the vim platform files"
-    cd platform-khadas
+	cd platform-khadas
 	tar xfJ vim.tar.xz
 	cd ..
 fi
@@ -97,7 +94,7 @@ then
 	rm -rf /mnt/volumio/*
 else
 	echo "Creating Volumio Temp Directory"
-	mkdir /mnt/volumio
+	sudo mkdir /mnt/volumio
 fi
 
 echo "Creating mount point for the images partition"
@@ -117,7 +114,8 @@ echo "Copying Khadas firmware"
 cp -pdR platform-khadas/vim/lib/firmware /mnt/volumio/rootfs/lib/
 echo "Copying Khadas etc files"
 cp -pdR platform-khadas/vim/etc/* /mnt/volumio/rootfs/etc
-
+echo "Copying Khadas usr/bin files"
+cp -pdR platform-khadas/vim/usr/* /mnt/volumio/rootfs/usr
 sync
 
 echo "Preparing to run chroot for more VIM configuration"
@@ -138,7 +136,7 @@ su -
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/vimconfig.sh /mnt/volumio/rootfs/root/init
+rm /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/vimconfig.sh
 
 echo "Unmounting Temp devices"
 umount -l /mnt/volumio/rootfs/dev
@@ -149,7 +147,7 @@ echo "==> VIM device installed"
 
 #echo "Removing temporary platform files"
 #echo "(you can keep it safely as long as you're sure of no changes)"
-#rm -r platform-khadas
+#sudo rm -r platform-khadas
 sync
 
 echo "Preparing rootfs base for SquashFS"

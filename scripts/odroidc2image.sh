@@ -3,16 +3,13 @@
 # Default build for Debian 32bit (to be changed to armv8)
 ARCH="armv7"
 
-while getopts ":v:p:a:" opt; do
+while getopts ":d:v:p:" opt; do
   case $opt in
     v)
       VERSION=$OPTARG
       ;;
     p)
       PATCH=$OPTARG
-      ;;
-    a)
-      ARCH=$OPTARG
       ;;
   esac
 done
@@ -30,8 +27,8 @@ echo "Creating Image File ${IMG_FILE} with $DISTRO rootfs"
 dd if=/dev/zero of=${IMG_FILE} bs=1M count=2800
 
 echo "Creating Image Bed"
-LOOP_DEV=`losetup -f --show ${IMG_FILE}`
-
+LOOP_DEV=`sudo losetup -f --show ${IMG_FILE}`
+# Note: leave the first 20Mb free for the firmware
 parted -s "${LOOP_DEV}" mklabel msdos
 parted -s "${LOOP_DEV}" mkpart primary fat32 1 64
 parted -s "${LOOP_DEV}" mkpart primary ext3 65 2500
@@ -98,7 +95,7 @@ then
 	rm -rf /mnt/volumio/*
 else
 	echo "Creating Volumio Temp Directory"
-	mkdir /mnt/volumio
+	sudo mkdir /mnt/volumio
 fi
 
 echo "Creating mount point for the images partition"
@@ -145,7 +142,7 @@ su -
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/odroidc2config.sh /mnt/volumio/rootfs/root/init
+rm /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/odroidc2config.sh
 
 echo "Unmounting Temp devices"
 umount -l /mnt/volumio/rootfs/dev

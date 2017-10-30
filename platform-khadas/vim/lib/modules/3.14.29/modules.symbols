@@ -116,7 +116,6 @@ alias symbol:rt2x00queue_for_each_entry rt2x00lib
 alias symbol:ath_reg_notifier_apply ath
 alias symbol:ablk_init_common ablk_helper
 alias symbol:fc_cpu_mask libfc
-alias symbol:fuse_dev_operations fuse
 alias symbol:l2cap_unregister_user bluetooth
 alias symbol:cfg80211_assoc_timeout cfg80211
 alias symbol:rt2x00lib_dmadone rt2x00lib
@@ -401,7 +400,6 @@ alias symbol:cx231xx_capture_start cx231xx
 alias symbol:tda18212_attach tda18212
 alias symbol:dib3000mc_i2c_enumeration dib3000mc
 alias symbol:dm_bm_unlock dm_persistent_data
-alias symbol:fuse_do_open fuse
 alias symbol:rtl_cam_reset_all_entry rtlwifi
 alias symbol:rtl_evm_db_to_percentage rtlwifi
 alias symbol:snd_rawmidi_output_params snd_rawmidi
@@ -460,7 +458,6 @@ alias symbol:flexcop_device_kfree b2c2_flexcop
 alias symbol:dm_rh_region_context dm_region_hash
 alias symbol:ieee80211_rts_get mac80211
 alias symbol:ath9k_hw_kill_interrupts ath9k_hw
-alias symbol:fuse_get_req fuse
 alias symbol:dm_deferred_entry_dec dm_bio_prison
 alias symbol:usb_wwan_tiocmget usb_wwan
 alias symbol:gspca_resume gspca_main
@@ -489,13 +486,11 @@ alias symbol:__tracepoint_bcache_btree_gc_coalesce bcache
 alias symbol:l2cap_register_user bluetooth
 alias symbol:rtl92c_dm_init_rate_adaptive_mask rtl8192c_common
 alias symbol:ath6kl_stop_txrx ath6kl_core
-alias symbol:fuse_file_poll fuse
 alias symbol:unregister_asymmetric_key_parser asymmetric_keys
 alias symbol:fc_host_post_event scsi_transport_fc
 alias symbol:ieee80211_scan_completed mac80211
 alias symbol:__adf_nbuf_ref qca9377
 alias symbol:cfg80211_cac_event cfg80211
-alias symbol:fuse_do_ioctl fuse
 alias symbol:hostap_80211_ops hostap
 alias symbol:l2cap_is_socket bluetooth
 alias symbol:md_raid10_congested raid10
@@ -544,7 +539,6 @@ alias symbol:bt_sock_link bluetooth
 alias symbol:fcoe_queue_timer libfcoe
 alias symbol:ath9k_hw_disable ath9k_hw
 alias symbol:gameport_open gameport
-alias symbol:fuse_conn_get fuse
 alias symbol:md_wait_for_blocked_rdev md_mod
 alias symbol:dib7090_get_adc_power dib7000p
 alias symbol:em28xx_write_regs em28xx
@@ -590,7 +584,6 @@ alias symbol:vxlan_get_rx_port vxlan
 alias symbol:iscsi_host_remove libiscsi
 alias symbol:ssb_driver_unregister ssb
 alias symbol:iscsi_free_session scsi_transport_iscsi
-alias symbol:fuse_abort_conn fuse
 alias symbol:rate_control_send_low mac80211
 alias symbol:rtl_usb_resume rtl_usb
 alias symbol:dib8000_pid_filter dib8000
@@ -889,7 +882,6 @@ alias symbol:ath9k_hw_setuptxqueue ath9k_hw
 alias symbol:fc_rport_init libfc
 alias symbol:ieee80211_stop_rx_ba_session mac80211
 alias symbol:videobuf_dvb_unregister_bus videobuf_dvb
-alias symbol:fuse_conn_init fuse
 alias symbol:rndis_rx_fixup rndis_host
 alias symbol:ieee80211_probereq_get mac80211
 alias symbol:ath10k_core_register ath10k_core
@@ -1052,7 +1044,6 @@ alias symbol:pkey_algo_name public_key
 alias symbol:snd_ac97_set_rate snd_ac97_codec
 alias symbol:cfg80211_roamed cfg80211
 alias symbol:iscsi_segment_seek_sg libiscsi_tcp
-alias symbol:fuse_request_send_background fuse
 alias symbol:rt2x00mac_configure_filter rt2x00lib
 alias symbol:hostap_handle_sta_tx_exc hostap
 alias symbol:lirc_register_driver lirc_dev
@@ -1098,7 +1089,6 @@ alias symbol:ath9k_hw_gpio_get ath9k_hw
 alias symbol:rt2x00queue_map_txskb rt2x00lib
 alias symbol:iscsi_queuecommand libiscsi
 alias symbol:fcoe_libfc_config libfcoe
-alias symbol:fuse_sync_release fuse
 alias symbol:usb_wwan_dtr_rts usb_wwan
 alias symbol:__cfg80211_alloc_reply_skb cfg80211
 alias symbol:ath9k_cmn_init_crypto ath9k_common
@@ -1167,7 +1157,6 @@ alias symbol:cfg80211_roamed_bss cfg80211
 alias symbol:dm_rh_flush dm_region_hash
 alias symbol:fc0011_attach fc0011
 alias symbol:ath9k_hw_disable_mib_counters ath9k_hw
-alias symbol:fuse_conn_put fuse
 alias symbol:team_modeop_port_change_dev_addr team
 alias symbol:bt_err bluetooth
 alias symbol:cfg80211_crit_proto_stopped cfg80211
@@ -1428,7 +1417,6 @@ alias symbol:rtl_send_smps_action rtlwifi
 alias symbol:rndis_unbind rndis_host
 alias symbol:closure_sub bcache
 alias symbol:rtl2830_get_tuner_i2c_adapter rtl2830
-alias symbol:fuse_put_request fuse
 alias symbol:fc_host_post_vendor_event scsi_transport_fc
 alias symbol:rt2x00mac_flush rt2x00lib
 alias symbol:sensor_hub_device_open hid_sensor_hub
@@ -1586,7 +1574,6 @@ alias symbol:go7007_parse_video_stream go7007
 alias symbol:dm_rh_get_region_size dm_region_hash
 alias symbol:dm_send_uevents dm_mod
 alias symbol:ath9k_hw_set_rx_bufsize ath9k_hw
-alias symbol:fuse_request_alloc fuse
 alias symbol:btmrvl_register_hdev btmrvl
 alias symbol:dm_suspended dm_mod
 alias symbol:ath_rxbuf_alloc ath
@@ -1658,7 +1645,6 @@ alias symbol:async_xor_val async_xor
 alias symbol:rt2800_vco_calibration rt2800lib
 alias symbol:dm_btree_walk dm_persistent_data
 alias symbol:ieee80211_sched_scan_stopped mac80211
-alias symbol:fuse_get_req_for_background fuse
 alias symbol:eeprom_93cx6_read eeprom_93cx6
 alias symbol:iscsi_get_port_state_name scsi_transport_iscsi
 alias symbol:__serpent_encrypt serpent_generic
@@ -1748,9 +1734,7 @@ alias symbol:hci_register_cb bluetooth
 alias symbol:rtl_get_tcb_desc rtlwifi
 alias symbol:tm6000_register_extension tm6000
 alias symbol:rt2x00mac_sta_remove rt2x00lib
-alias symbol:fuse_dev_release fuse
 alias symbol:mpi_free mpi
-alias symbol:fuse_request_send fuse
 alias symbol:hostap_init_ap_proc hostap
 alias symbol:mfd_cell_disable mfd_core
 alias symbol:dm_btree_lookup dm_persistent_data
@@ -1758,7 +1742,6 @@ alias symbol:gf128mul_free_64k gf128mul
 alias symbol:rt2x00usb_uninitialize rt2x00usb
 alias symbol:rt2800_ampdu_action rt2800lib
 alias symbol:dm_bufio_get_block_number dm_bufio
-alias symbol:fuse_conn_kill fuse
 alias symbol:hci_suspend_dev bluetooth
 alias symbol:usb_wwan_port_probe usb_wwan
 alias symbol:lrw_crypt lrw
@@ -1776,7 +1759,6 @@ alias symbol:usbip_pack_pdu usbip_core
 alias symbol:iscsi_eh_session_reset libiscsi
 alias symbol:__gameport_register_driver gameport
 alias symbol:rt2x00queue_flush_queues rt2x00lib
-alias symbol:fuse_direct_io fuse
 alias symbol:fc_set_mfs libfc
 alias symbol:hostap_set_word hostap
 alias symbol:rt2x00mac_add_interface rt2x00lib
