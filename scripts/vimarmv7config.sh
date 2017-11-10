@@ -8,7 +8,7 @@ echo "Creating \"fstab\""
 echo "# Khadas VIM fstab" > /etc/fstab
 echo "" >> /etc/fstab
 echo "proc            /proc           proc    defaults        0       0
-/dev/mmcblk0p1  /boot           vfat    defaults,utf8,user,rw,umask=111,dmask=000        0       1
+LABEL=BOOT  /boot           vfat    defaults,utf8,user,rw,umask=111,dmask=000        0       1
 tmpfs   /var/log                tmpfs   size=20M,nodev,uid=1000,mode=0777,gid=4, 0 0
 tmpfs   /var/spool/cups         tmpfs   defaults,noatime,mode=0755 0 0
 tmpfs   /var/spool/cups/tmp     tmpfs   defaults,noatime,mode=0755 0 0
@@ -18,6 +18,7 @@ tmpfs   /dev/shm                tmpfs   defaults,nosuid,noexec,nodev        0 0
 
 echo "#!/bin/sh -e
 /etc/hdmi.sh
+/etc/fan.sh
 exit 0" > /etc/rc.local
 
 echo "Installing additonal packages"

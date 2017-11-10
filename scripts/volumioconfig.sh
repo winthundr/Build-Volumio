@@ -106,7 +106,7 @@ ln -s '/usr/lib/systemd/system/console-kit-daemon.service' '/etc/systemd/system/
 ################
 #Volumio System#---------------------------------------------------
 ################
-if [ $(uname -m) = armv7l ]; then
+if [ $(uname -m) = armv7l ] || [ $(uname -m) = aarch64 ]; then
   echo "Arm Environment detected"
   echo ' Adding Raspbian Repo Key'
   wget https://archive.raspbian.org/raspbian.public.key -O - | sudo apt-key add -
@@ -191,7 +191,7 @@ if [ $(uname -m) = armv7l ]; then
      rm volumio-remote-updater_1.2-armhf.deb
 
 
-  elif [ $ARCH = armv7 ]; then
+  elif [ $ARCH = armv7 ] || [ $ARCH = armv8 ]; then
      echo "Installing MPD for armv7"
      # First we manually install a newer alsa-lib to achieve Direct DSD support
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Default build for Debian 32bit (to be changed to armv8)
-ARCH="armv7"
+ARCH="armv8"
 
 while getopts ":d:v:p:" opt; do
   case $opt in
@@ -15,12 +15,12 @@ while getopts ":d:v:p:" opt; do
 done
 
 BUILDDATE=$(date -I)
-IMG_FILE="Volumio${VERSION}-${BUILDDATE}-vim.img"
+IMG_FILE="Volumio${VERSION}-${BUILDDATE}-vim-armv8.img"
 
 if [ "$ARCH" = arm ]; then
   DISTRO="Raspbian"
 else
-  DISTRO="Debian 32bit"
+  DISTRO="Debian arm64"
 fi
 
 echo "Creating Image File ${IMG_FILE} with $DISTRO rootfs"
@@ -56,7 +56,7 @@ mkfs -F -t ext4 -L volumio "${SYS_PART}"
 mkfs -F -t ext4 -L volumio_data "${DATA_PART}"
 sync
 
-echo "Preparing for the Khadas VIM kernel/ platform files"
+echo "Preparing for the Khadas VIM kernel and platform files"
 if [ -d platform-khadas ]
 then
 	echo "Platform folder already exists - keeping it"
@@ -94,7 +94,7 @@ then
 	rm -rf /mnt/volumio/*
 else
 	echo "Creating Volumio Temp Directory"
-	sudo mkdir /mnt/volumio
+	mkdir /mnt/volumio
 fi
 
 echo "Creating mount point for the images partition"
@@ -119,7 +119,7 @@ cp -pdR platform-khadas/vim/usr/* /mnt/volumio/rootfs/usr
 sync
 
 echo "Preparing to run chroot for more VIM configuration"
-cp scripts/vimconfig.sh /mnt/volumio/rootfs
+cp scripts/vimarmv8config.sh /mnt/volumio/rootfs
 cp scripts/initramfs/init /mnt/volumio/rootfs/root
 cp scripts/initramfs/mkinitramfs-custom.sh /mnt/volumio/rootfs/usr/local/sbin
 #copy the scripts for updating from usb
@@ -132,11 +132,11 @@ echo $PATCH > /mnt/volumio/rootfs/patch
 
 chroot /mnt/volumio/rootfs /bin/bash -x <<'EOF'
 su -
-/vimconfig.sh
+/vimarmv8config.sh
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/vimconfig.sh
+rm /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/vimarmv8config.sh
 
 echo "Unmounting Temp devices"
 umount -l /mnt/volumio/rootfs/dev

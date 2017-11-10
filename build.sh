@@ -145,7 +145,11 @@ if [ -n "$BUILD" ]; then
   multistrap -a "$ARCH" -f "$CONF"
   if [ ! "$BUILD" = x86 ]; then
     echo "Build for arm/armv7/armv8 platform, copying qemu"
-    cp /usr/bin/qemu-arm-static "build/$BUILD/root/usr/bin/"
+	if [ "$BUILD" = armv8 ]; then
+	    cp /usr/bin/qemu-aarch64-static "build/$BUILD/root/usr/bin/"
+	else
+	    cp /usr/bin/qemu-arm-static "build/$BUILD/root/usr/bin/"
+	fi
   fi
   cp scripts/volumioconfig.sh "build/$BUILD/root"
 
@@ -156,14 +160,13 @@ if [ -n "$BUILD" ]; then
   echo 'Cloning Volumio Node Backend'
   mkdir "build/$BUILD/root/volumio"
   if [ -n "$PATCH" ]; then
-  echo "Cloning Volumio with all its history"
-  git clone -b master --single-branch https://github.com/volumio/Volumio2.git build/$BUILD/root/volumio
-  else 
-  git clone --depth 1 -b master --single-branch https://github.com/volumio/Volumio2.git build/$BUILD/root/volumio
+      echo "Cloning Volumio with all its history"
+      git clone -b master --single-branch https://github.com/volumio/Volumio2.git build/$BUILD/root/volumio
+  else
+      git clone --depth 1 -b master --single-branch https://github.com/volumio/Volumio2.git build/$BUILD/root/volumio
   fi
   echo 'Cloning Volumio UI'
   git clone --depth 1 -b dist --single-branch https://github.com/volumio/Volumio2-UI.git "build/$BUILD/root/volumio/http/www"
-
 
   echo "Adding os-release infos"
   {
@@ -287,15 +290,13 @@ case "$DEVICE" in
     check_os_release "armv7" "$VERSION" "$DEVICE"
     sh scripts/vszeroimage.sh -v "$VERSION" -p "$PATCH" -a armv7
     ;;
-  vim) echo 'Writing Khadas VIM Image File'
+  vimarmv7) echo 'Writing Khadas VIM Image File'
     check_os_release "armv7" "$VERSION" "$DEVICE"
-# this will be changed to armv8 once the volumio packges have been re-compiled for aarch64
-    sh scripts/vimimage.sh -v "$VERSION" -p "$PATCH" -a armv7
+    sh scripts/vimarmv7image.sh -v "$VERSION" -p "$PATCH" -a armv7
     ;;
-  vim2) echo 'Writing Khadas VIM2 Image File'
-    check_os_release "armv7" "$VERSION" "$DEVICE"
-# this will be changed to armv8 once the volumio packges have been re-compiled for aarch64
-    sh scripts/vim2image.sh -v "$VERSION" -p "$PATCH" -a armv7
+  vimarmv8) echo 'Writing Khadas VIM Image File'
+    check_os_release "armv8" "$VERSION" "$DEVICE"
+    sh scripts/vimarmv8image.sh -v "$VERSION" -p "$PATCH" -a armv8
     ;;
   x86) echo 'Writing x86 Image File'
     check_os_release "x86" "$VERSION" "$DEVICE"
