@@ -3,13 +3,16 @@
 # Default build for Debian 32bit (to be changed to armv8)
 ARCH="armv7"
 
-while getopts ":d:v:p:" opt; do
+while getopts ":v:p:a:" opt; do
   case $opt in
     v)
       VERSION=$OPTARG
       ;;
     p)
       PATCH=$OPTARG
+      ;;
+    a)
+      ARCH=$OPTARG
       ;;
   esac
 done
@@ -23,7 +26,8 @@ else
   DISTRO="Debian 32bit"
 fi
 
-echo "Creating Image File ${IMG_FILE} with $DISTRO rootfs"
+echo "Creating Image File ${IMG_FILE} with ${DISTRO} rootfs"
+
 dd if=/dev/zero of=${IMG_FILE} bs=1M count=2800
 
 echo "Creating Image Bed"
@@ -120,7 +124,7 @@ sync
 
 echo "Preparing to run chroot for more VIM configuration"
 cp scripts/vimarmv7config.sh /mnt/volumio/rootfs
-cp scripts/initramfs/init /mnt/volumio/rootfs/root
+cp scripts/initramfs/init.nextarm /mnt/volumio/rootfs/root/init
 cp scripts/initramfs/mkinitramfs-custom.sh /mnt/volumio/rootfs/usr/local/sbin
 #copy the scripts for updating from usb
 wget -P /mnt/volumio/rootfs/root http://repo.volumio.org/Volumio2/Binaries/volumio-init-updater
@@ -130,13 +134,21 @@ mount /proc /mnt/volumio/rootfs/proc -t proc
 mount /sys /mnt/volumio/rootfs/sys -t sysfs
 echo $PATCH > /mnt/volumio/rootfs/patch
 
+echo "Creating s905_autoscript.txt"
+UUID_DATA=$(blkid -s UUID -o value ${DATA_PART})
+UUID_IMG=$(blkid -s UUID -o value ${SYS_PART})
+UUID_BOOT=$(blkid -s UUID -o value ${BOOT_PART})
+echo "setenv boot_part imgpart=UUID=${UUID_IMG} imgfile=/volumio_current.sqsh bootpart=UUID=${UUID_BOOT} datapart=UUID=${UUID_DATA}
+" > /mnt/volumio/rootfs/boot/s905_autoscript.txt
+cat /mnt/volumio/rootfs/boot/txt/s905_autoscript.cmd >> /mnt/volumio/rootfs/boot/s905_autoscript.txt
+
 chroot /mnt/volumio/rootfs /bin/bash -x <<'EOF'
 su -
 /vimarmv7config.sh
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/vimarmv7config.sh
+rm /mnt/volumio/rootfs/root/init.sh /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/vimarmv7config.sh
 
 echo "Unmounting Temp devices"
 umount -l /mnt/volumio/rootfs/dev
