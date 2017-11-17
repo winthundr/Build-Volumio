@@ -13,7 +13,7 @@ done
 
 echo 'Copying Custom Volumio System Files'
 #Apt conf file
-if [ "$BUILD" = arm ] || [ "$BUILD" = armv7 ] || [ "$BUILD" = armv8 ]; then
+if [ "$BUILD" = arm ] || [ "$BUILD" = armv7 ] || [ "$BUILD" = armv7-deb9 ] || [ "$BUILD" = armv8 ]; then
   echo 'Copying ARM related configuration files'
   cp volumio/etc/apt/sources.list.$BUILD build/$BUILD/root/etc/apt/sources.list
   echo 'Setting time for ARM devices with fakehwclock to build time'
@@ -96,7 +96,7 @@ chmod a+x build/$BUILD/root/bin/volumiossh.sh
 
 echo 'Done Copying Custom Volumio System Files'
 
-echo "Stripping binaries and libraries to save space"
+#echo "Stripping binaries and libraries to save space"
 
 #echo "Size before strip"$( du -sh build/$BUILD/root/ )
 #find build/$BUILD/root/usr/lib -type f -name \*.a  -exec strip --strip-debug {} ';'

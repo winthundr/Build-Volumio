@@ -117,7 +117,11 @@ if [ -n "$BUILD" ]; then
   elif [ "$BUILD" = armv7 ] || [ "$BUILD" = armv7-dev ]; then
     ARCH="armhf"
     BUILD="armv7"
-    echo "Building ARMV7 Base System with Debian"
+    echo "Building ARMV7 Base System with Debian Jessie"
+  elif [ "$BUILD" = armv7-deb9 ]; then
+    ARCH="armhf"
+    BUILD="armv7-deb9"
+    echo "Building ARMV7 Base System with Debian Stretch"
   elif [ "$BUILD" = armv8 ] || [ "$BUILD" = armv8-dev ]; then
     ARCH="arm64"
     BUILD="armv8"
@@ -293,6 +297,10 @@ case "$DEVICE" in
   vimarmv7) echo 'Writing Khadas VIM Image File'
     check_os_release "armv7" "$VERSION" "$DEVICE"
     sh scripts/vimarmv7image.sh -v "$VERSION" -p "$PATCH" -a armv7
+    ;;
+  vimarmv7-deb9) echo 'Writing Khadas VIM Image File'
+    check_os_release "armv7-deb9" "$VERSION" "$DEVICE"
+    sh scripts/vimarmv7-deb9image.sh -v "$VERSION" -p "$PATCH" -a armv7-deb9
     ;;
   vimarmv8) echo 'Writing Khadas VIM Image File'
     check_os_release "armv8" "$VERSION" "$DEVICE"

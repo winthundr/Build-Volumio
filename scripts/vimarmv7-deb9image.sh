@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Default build for Debian 32bit (to be changed to armv8)
-ARCH="armv7"
+ARCH="armv7-deb9"
 
 while getopts ":v:p:a:" opt; do
   case $opt in
@@ -18,7 +18,7 @@ while getopts ":v:p:a:" opt; do
 done
 
 BUILDDATE=$(date -I)
-IMG_FILE="Volumio${VERSION}-${BUILDDATE}-vim-armv7.img"
+IMG_FILE="Volumio${VERSION}-${BUILDDATE}-vim-armv7-deb9.img"
 
 if [ "$ARCH" = arm ]; then
   DISTRO="Raspbian"
@@ -123,7 +123,7 @@ cp -pdR platform-khadas/vim/usr/* /mnt/volumio/rootfs/usr
 sync
 
 echo "Preparing to run chroot for more VIM configuration"
-cp scripts/vimarmv7config.sh /mnt/volumio/rootfs
+cp scripts/vimarmv7-deb9config.sh /mnt/volumio/rootfs
 cp scripts/initramfs/init.nextarm /mnt/volumio/rootfs/root/init
 cp scripts/initramfs/mkinitramfs-custom.sh /mnt/volumio/rootfs/usr/local/sbin
 #copy the scripts for updating from usb
@@ -143,11 +143,11 @@ cat /mnt/volumio/rootfs/boot/txt/s905_autoscript.cmd >> /mnt/volumio/rootfs/boot
 
 chroot /mnt/volumio/rootfs /bin/bash -x <<'EOF'
 su -
-/vimarmv7config.sh
+/vimarmv7-deb9config.sh
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/root/init.sh /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/vimarmv7config.sh
+rm /mnt/volumio/rootfs/root/init.sh /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/vimarmv7-deb9config.sh
 
 echo "Unmounting Temp devices"
 umount -l /mnt/volumio/rootfs/dev
