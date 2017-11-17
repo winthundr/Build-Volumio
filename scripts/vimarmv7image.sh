@@ -60,23 +60,16 @@ mkfs -F -t ext4 -L volumio "${SYS_PART}"
 mkfs -F -t ext4 -L volumio_data "${DATA_PART}"
 sync
 
-echo "Preparing for the Khadas VIM kernel/ platform files"
+echo "Preparing for the Khadas VIM kernel and platform files"
 if [ -d platform-khadas ]
 then
-	echo "Platform folder already exists - keeping it"
-    # if you really want to re-clone from the repo, then delete the platform-khadas folder
-    # that will refresh all the khadas platforms, see below
+	echo "Pull from repo"
 	cd platform-khadas
-	if [ ! -d vim ]; then
-	   tar xfJ vim.tar.xz
-	fi
+	git pull
 	cd ..
 else
 	echo "Clone all Khadas files from repo"
-#	git clone https://github.com/volumio/Platform-khadas.git platform-khadas
-	echo "Unpack the vim platform files"
-	cd platform-khadas
-	tar xfJ vim.tar.xz
+	git clone https://github.com/150balbes/platform-khadas.git platform-khadas
 	cd ..
 fi
 
@@ -147,7 +140,9 @@ su -
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/root/init.sh /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/vimarmv7config.sh
+rm /mnt/volumio/rootfs/vimarmv7config.sh
+rm /mnt/volumio/rootfs/root/init
+rm /mnt/volumio/rootfs/usr/local/sbin/mkinitramfs-custom.sh
 
 echo "Unmounting Temp devices"
 umount -l /mnt/volumio/rootfs/dev
