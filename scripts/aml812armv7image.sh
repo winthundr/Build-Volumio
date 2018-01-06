@@ -18,7 +18,7 @@ while getopts ":v:p:a:" opt; do
 done
 
 BUILDDATE=$(date -I)
-IMG_FILE="Volumio${VERSION}-${BUILDDATE}-vim-armv7.img"
+IMG_FILE="Volumio${VERSION}-${BUILDDATE}-aml812-armv7.img"
 
 if [ "$ARCH" = arm ]; then
   DISTRO="Raspbian"
@@ -60,23 +60,23 @@ mkfs -F -t ext4 -L volumio "${SYS_PART}"
 mkfs -F -t ext4 -L volumio_data "${DATA_PART}"
 sync
 
-echo "Preparing for the Khadas VIM kernel and platform files"
-if [ -d platform-khadas ]
+echo "Preparing for the AML kernel and platform files"
+if [ -d platform-aml ]
 then
 	echo "Pull from repo"
-	cd platform-khadas
-	git pull
+	cd platform-aml
+#	git pull
 	cd ..
 else
-	echo "Clone all Khadas files from repo"
-	git clone https://github.com/150balbes/platform-khadas.git platform-khadas
+	echo "Clone all AML files from repo"
+	git clone https://github.com/150balbes/platform-aml.git platform-aml
 	cd ..
 fi
 
-echo "Copying the bootloader"
-dd if=platform-khadas/vim/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=1 count=442
-dd if=platform-khadas/vim/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=512 skip=1 seek=1
-sync
+#echo "Copying the bootloader"
+#dd if=platform-khadas/vim/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=1 count=442
+#dd if=platform-khadas/vim/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=512 skip=1 seek=1
+#sync
 
 echo "Preparing for Volumio rootfs"
 if [ -d /mnt ]
@@ -103,22 +103,21 @@ mount -t vfat "${BOOT_PART}" /mnt/volumio/rootfs/boot
 
 echo "Copying Volumio RootFs"
 cp -pdR build/$ARCH/root/* /mnt/volumio/rootfs
-echo "Copying Khadas boot files"
-cp -pdR platform-khadas/vim/boot/* /mnt/volumio/rootfs/boot
-echo "Copying Khadas modules"
-cp -pdR platform-khadas/vim/lib/modules /mnt/volumio/rootfs/lib/
-echo "Copying Khadas firmware"
-cp -pdR platform-khadas/vim/lib/firmware /mnt/volumio/rootfs/lib/
-echo "Copying Khadas etc files"
-cp -pdR platform-khadas/vim/etc/* /mnt/volumio/rootfs/etc
-echo "Copying Khadas usr/bin files"
-cp -pdR platform-khadas/vim/usr/* /mnt/volumio/rootfs/usr
-sync
+echo "Copying boot files"
+cp -pdR platform-aml/s812/boot/* /mnt/volumio/rootfs/boot
+echo "Copying modules"
+cp -pdR platform-aml/s812/lib/modules /mnt/volumio/rootfs/lib/
+echo "Copying firmware"
+cp -pdR platform-aml/s812/lib/firmware /mnt/volumio/rootfs/lib/
+echo "Copying etc files"
+cp -pdR platform-aml/s812/etc/* /mnt/volumio/rootfs/etc
+#echo "Copying usr/bin files"
+#cp -pdR platform-aml/s812/usr/* /mnt/volumio/rootfs/usr
+#sync
 
-echo "Preparing to run chroot for more VIM configuration"
-cp scripts/vimarmv7config.sh /mnt/volumio/rootfs
+echo "Preparing to run chroot for more AML configuration"
+cp scripts/aml812armv7config.sh /mnt/volumio/rootfs
 cp scripts/initramfs/init.nextarm /mnt/volumio/rootfs/root/init
-#cp scripts/initramfs/init.next_nofs /mnt/volumio/rootfs/root/init
 cp scripts/initramfs/mkinitramfs-custom.sh /mnt/volumio/rootfs/usr/local/sbin
 #copy the scripts for updating from usb
 wget -P /mnt/volumio/rootfs/root http://repo.volumio.org/Volumio2/Binaries/volumio-init-updater
@@ -128,20 +127,20 @@ mount /proc /mnt/volumio/rootfs/proc -t proc
 mount /sys /mnt/volumio/rootfs/sys -t sysfs
 echo $PATCH > /mnt/volumio/rootfs/patch
 
-echo "Creating s905_autoscript.txt"
+echo "Creating s805_autoscript.txt"
 UUID_DATA=$(blkid -s UUID -o value ${DATA_PART})
 UUID_IMG=$(blkid -s UUID -o value ${SYS_PART})
 UUID_BOOT=$(blkid -s UUID -o value ${BOOT_PART})
-echo "setenv boot_part imgpart=UUID=${UUID_IMG} imgfile=/volumio_current.sqsh bootpart=UUID=${UUID_BOOT} datapart=UUID=${UUID_DATA}" > /mnt/volumio/rootfs/boot/s905_autoscript.txt
-cat /mnt/volumio/rootfs/boot/txt/s905_autoscript.cmd >> /mnt/volumio/rootfs/boot/s905_autoscript.txt
+echo "setenv boot_part imgpart=UUID=${UUID_IMG} imgfile=/volumio_current.sqsh bootpart=UUID=${UUID_BOOT} datapart=UUID=${UUID_DATA}" > /mnt/volumio/rootfs/boot/s805_autoscript.txt
+cat /mnt/volumio/rootfs/boot/txt/s805_autoscript.cmd >> /mnt/volumio/rootfs/boot/s805_autoscript.txt
 
 chroot /mnt/volumio/rootfs /bin/bash -x <<'EOF'
 su -
-/vimarmv7config.sh
+/aml812armv7config.sh
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/vimarmv7config.sh
+rm /mnt/volumio/rootfs/aml812armv7config.sh
 rm /mnt/volumio/rootfs/root/init
 rm /mnt/volumio/rootfs/usr/local/sbin/mkinitramfs-custom.sh
 
@@ -150,11 +149,11 @@ umount -l /mnt/volumio/rootfs/dev
 umount -l /mnt/volumio/rootfs/proc
 umount -l /mnt/volumio/rootfs/sys
 
-echo "==> VIM device installed"
+echo "==> AML device installed"
 
 #echo "Removing temporary platform files"
 #echo "(you can keep it safely as long as you're sure of no changes)"
-#sudo rm -r platform-khadas
+#sudo rm -r platform-aml
 sync
 
 echo "Preparing rootfs base for SquashFS"
