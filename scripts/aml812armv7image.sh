@@ -65,7 +65,7 @@ if [ -d platform-aml ]
 then
 	echo "Pull from repo"
 	cd platform-aml
-#	git pull
+	git pull
 	cd ..
 else
 	echo "Clone all AML files from repo"
