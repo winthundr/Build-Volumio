@@ -18,7 +18,7 @@ while getopts ":v:p:a:" opt; do
 done
 
 BUILDDATE=$(date -I)
-IMG_FILE="Volumio${VERSION}-${BUILDDATE}-aml812-armv7.img"
+IMG_FILE="Volumio${VERSION}-${BUILDDATE}-aml805-armv7.img"
 
 if [ "$ARCH" = arm ]; then
   DISTRO="Raspbian"
@@ -104,19 +104,19 @@ mount -t vfat "${BOOT_PART}" /mnt/volumio/rootfs/boot
 echo "Copying Volumio RootFs"
 cp -pdR build/$ARCH/root/* /mnt/volumio/rootfs
 echo "Copying boot files"
-cp -pdR platform-aml/s812/boot/* /mnt/volumio/rootfs/boot
+cp -pdR platform-aml/s805/boot/* /mnt/volumio/rootfs/boot
 echo "Copying modules"
-cp -pdR platform-aml/s812/lib/modules /mnt/volumio/rootfs/lib/
+cp -pdR platform-aml/s805/lib/modules /mnt/volumio/rootfs/lib/
 echo "Copying firmware"
-cp -pdR platform-aml/s812/lib/firmware /mnt/volumio/rootfs/lib/
+cp -pdR platform-aml/s805/lib/firmware /mnt/volumio/rootfs/lib/
 echo "Copying etc files"
-cp -pdR platform-aml/s812/etc/* /mnt/volumio/rootfs/etc
+cp -pdR platform-aml/s805/etc/* /mnt/volumio/rootfs/etc
 #echo "Copying usr/bin files"
 #cp -pdR platform-aml/s812/usr/* /mnt/volumio/rootfs/usr
 #sync
 
 echo "Preparing to run chroot for more AML configuration"
-cp scripts/aml812armv7config.sh /mnt/volumio/rootfs
+cp scripts/aml805armv7config.sh /mnt/volumio/rootfs
 cp scripts/initramfs/init.nextarm /mnt/volumio/rootfs/root/init
 cp scripts/initramfs/mkinitramfs-custom.sh /mnt/volumio/rootfs/usr/local/sbin
 #copy the scripts for updating from usb
@@ -136,11 +136,11 @@ cat /mnt/volumio/rootfs/boot/txt/s805_autoscript.cmd >> /mnt/volumio/rootfs/boot
 
 chroot /mnt/volumio/rootfs /bin/bash -x <<'EOF'
 su -
-/aml812armv7config.sh
+/aml805armv7config.sh
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/aml812armv7config.sh
+rm /mnt/volumio/rootfs/aml805armv7config.sh
 rm /mnt/volumio/rootfs/root/init
 rm /mnt/volumio/rootfs/usr/local/sbin/mkinitramfs-custom.sh
 

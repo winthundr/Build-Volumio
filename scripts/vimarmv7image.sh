@@ -60,22 +60,22 @@ mkfs -F -t ext4 -L volumio "${SYS_PART}"
 mkfs -F -t ext4 -L volumio_data "${DATA_PART}"
 sync
 
-echo "Preparing for the Khadas VIM kernel and platform files"
-if [ -d platform-khadas ]
+echo "Preparing for the AML kernel and platform files"
+if [ -d platform-aml ]
 then
 	echo "Pull from repo"
-	cd platform-khadas
+	cd platform-aml
 	git pull
 	cd ..
 else
 	echo "Clone all Khadas files from repo"
-	git clone https://github.com/150balbes/platform-khadas.git platform-khadas
-	cd ..
+	git clone https://github.com/150balbes/platform-aml.git platform-aml
+#	cd ..
 fi
 
 echo "Copying the bootloader"
-dd if=platform-khadas/vim/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=1 count=442
-dd if=platform-khadas/vim/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=512 skip=1 seek=1
+dd if=platform-aml/s9xxx/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=1 count=442
+dd if=platform-aml/s9xxx/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=512 skip=1 seek=1
 sync
 
 echo "Preparing for Volumio rootfs"
@@ -104,15 +104,15 @@ mount -t vfat "${BOOT_PART}" /mnt/volumio/rootfs/boot
 echo "Copying Volumio RootFs"
 cp -pdR build/$ARCH/root/* /mnt/volumio/rootfs
 echo "Copying Khadas boot files"
-cp -pdR platform-khadas/vim/boot/* /mnt/volumio/rootfs/boot
+cp -pdR platform-aml/s9xxx/boot/* /mnt/volumio/rootfs/boot
 echo "Copying Khadas modules"
-cp -pdR platform-khadas/vim/lib/modules /mnt/volumio/rootfs/lib/
+cp -pdR platform-aml/s9xxx/lib/modules /mnt/volumio/rootfs/lib/
 echo "Copying Khadas firmware"
-cp -pdR platform-khadas/vim/lib/firmware /mnt/volumio/rootfs/lib/
+cp -pdR platform-aml/s9xxx/lib/firmware /mnt/volumio/rootfs/lib/
 echo "Copying Khadas etc files"
-cp -pdR platform-khadas/vim/etc/* /mnt/volumio/rootfs/etc
+cp -pdR platform-aml/s9xxx/etc/* /mnt/volumio/rootfs/etc
 echo "Copying Khadas usr/bin files"
-cp -pdR platform-khadas/vim/usr/* /mnt/volumio/rootfs/usr
+cp -pdR platform-aml/s9xxx/usr/* /mnt/volumio/rootfs/usr
 sync
 
 echo "Preparing to run chroot for more VIM configuration"
@@ -154,7 +154,7 @@ echo "==> VIM device installed"
 
 #echo "Removing temporary platform files"
 #echo "(you can keep it safely as long as you're sure of no changes)"
-#sudo rm -r platform-khadas
+#sudo rm -r platform-aml
 sync
 
 echo "Preparing rootfs base for SquashFS"
