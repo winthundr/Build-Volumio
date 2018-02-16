@@ -2,7 +2,6 @@
 
 # Default PATH differs between shells, and is not automatically exported
 # by klibc dash.  Make it consistent.
-
 export PATH=/sbin:/usr/sbin:/bin:/usr/bin
 
 [ -d /proc ] || mkdir /proc

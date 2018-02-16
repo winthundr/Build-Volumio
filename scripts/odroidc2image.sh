@@ -3,13 +3,16 @@
 # Default build for Debian 32bit (to be changed to armv8)
 ARCH="armv7"
 
-while getopts ":d:v:p:" opt; do
+while getopts ":v:p:a:" opt; do
   case $opt in
     v)
       VERSION=$OPTARG
       ;;
     p)
       PATCH=$OPTARG
+      ;;
+    a)
+      ARCH=$OPTARG
       ;;
   esac
 done
@@ -142,7 +145,7 @@ su -
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/root/init /mnt/volumio/rootfs/odroidc2config.sh
+rm /mnt/volumio/rootfs/odroidc2config.sh /mnt/volumio/rootfs/root/init
 
 echo "Unmounting Temp devices"
 umount -l /mnt/volumio/rootfs/dev

@@ -18,7 +18,7 @@ while getopts ":v:p:a:" opt; do
 done
 
 BUILDDATE=$(date -I)
-IMG_FILE="Volumio${VERSION}-${BUILDDATE}-sopine64.img"
+IMG_FILE="Volumio${VERSION}-${BUILDDATE}-nanopi64.img"
 
 if [ "$ARCH" = arm ]; then
   DISTRO="Raspbian"
@@ -60,24 +60,23 @@ sudo mkfs -F -t ext4 -L volumio "${SYS_PART}"
 sudo mkfs -F -t ext4 -L volumio_data "${DATA_PART}"
 sync
 
-echo "Preparing for the (so)Pine64(LTS) kernel/ platform files"
-if [ -d platform-pine64 ]
+echo "Preparing for the Nanopi kernel/ platform files"
+if [ -d platform-nanopi ]
 then
 	echo "Platform folder already exists - keeping it"
-    # if you really want to re-clone from the repo, then delete the platform-pine64 folder
+    # if you really want to re-clone from the repo, then delete the platform-nanopi folder
     # that will refresh all the odroid platforms, see below
 else
-	echo "Clone (so)Pine64(LTS) files from repo"
-	git clone https://github.com/volumio/platform-pine64.git platform-pine64
-	echo "Unpack the (so)Pine64(LTS) platform files"
-    cd platform-pine64
-	tar xfJ sopine64lts.tar.xz
+	echo "Clone  Nanopi64 files from repo"
+	git clone https://github.com/gkkpch/platform-nanopi platform-nanopi
+	echo "Unpack the platform files"
+    cd  platform-nanopi
+	tar xfJ nanopi-a64.tar.xz
 	cd ..
 fi
 
-echo "Copying the soPine64 (and Pine64LTS) bootloader"
-sudo dd if=platform-pine64/sopine64/u-boot/boot0-pine64-sopine.bin of=${LOOP_DEV} conv=notrunc bs=1k seek=8
-sudo dd if=platform-pine64/sopine64/u-boot/u-boot-pine64-sopine.bin of=${LOOP_DEV} conv=notrunc bs=1k seek=19096
+echo "Copying the bootloader"
+sudo dd if=platform-nanopi/nanopi-a64/u-boot/u-boot-nanopi64.bin of=${LOOP_DEV} conv=notrunc bs=1k seek=8
 sync
 
 echo "Preparing for Volumio rootfs"
@@ -105,25 +104,24 @@ sudo mount -t vfat "${BOOT_PART}" /mnt/volumio/rootfs/boot
 
 echo "Copying Volumio RootFs"
 sudo cp -pdR build/$ARCH/root/* /mnt/volumio/rootfs
-echo "Copying (so)Pine64(LTS) boot files"
-mkdir /mnt/volumio/rootfs/boot/pine64
-sudo cp platform-pine64/sopine64/boot/pine64/Image /mnt/volumio/rootfs/boot/pine64
-sudo cp platform-pine64/sopine64/boot/pine64/*.dtb /mnt/volumio/rootfs/boot/pine64
-sudo cp platform-pine64/sopine64/boot/uEnv.txt /mnt/volumio/rootfs/boot
-sudo cp platform-pine64/sopine64/boot/Image.version /mnt/volumio/rootfs/boot
-sudo cp platform-pine64/sopine64/boot/config* /mnt/volumio/rootfs/boot
+echo "Copying Nanopi64  boot files"
+#mkdir /mnt/volumio/rootfs/boot/extlinux
+sudo cp platform-nanopi/nanopi-a64/boot/Image /mnt/volumio/rootfs/boot/
+sudo cp platform-nanopi/nanopi-a64/boot/*.dtb /mnt/volumio/rootfs/boot/
+sudo cp platform-nanopi/nanopi-a64/boot/*.txt /mnt/volumio/rootfs/boot/
+# Overrides 2 u-boot environment defaults, allowing a boot script to be started.
+sudo cp platform-nanopi/nanopi-a64/boot/uboot.env /mnt/volumio/rootfs/boot/
+# Add boot script
+mkimage -C none -A arm -T script -d platform-nanopi/nanopi-a64/boot/boot.cmd /mnt/volumio/rootfs/boot/boot.scr
 
-echo "Copying (so)Pine64(LTS) modules and firmware"
-sudo cp -pdR platform-pine64/sopine64/lib/modules /mnt/volumio/rootfs/lib/
-sudo cp -pdR platform-pine64/sopine64/lib/firmware /mnt/volumio/rootfs/lib/
-
-echo "Confguring ALSA with sane defaults"
-sudo cp platform-pine64/sopine64/var/lib/alsa/* /mnt/volumio/rootfs/var/lib/alsa
+echo "Copying  Nanopi64 modules and firmware"
+sudo cp -pdR platform-nanopi/nanopi-a64/lib/modules /mnt/volumio/rootfs/lib/
+sudo cp -pdR platform-nanopi/nanopi-a64/lib/firmware /mnt/volumio/rootfs/lib/
 
 sync
 
-echo "Preparing to run chroot for more SOPINE A64 configuration (equals pine64)"
-cp scripts/pine64config.sh /mnt/volumio/rootfs
+echo "Preparing to run chroot for more Nanopi a64 configuration"
+cp scripts/nanopi64config.sh /mnt/volumio/rootfs
 cp scripts/initramfs/init /mnt/volumio/rootfs/root
 cp scripts/initramfs/mkinitramfs-custom.sh /mnt/volumio/rootfs/usr/local/sbin
 #copy the scripts for updating from usb
@@ -136,27 +134,22 @@ echo $PATCH > /mnt/volumio/rootfs/patch
 
 chroot /mnt/volumio/rootfs /bin/bash -x <<'EOF'
 su -
-/pine64config.sh
+/nanopi64config.sh
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/pine64config.sh /mnt/volumio/rootfs/root/init
+rm /mnt/volumio/rootfs/nanopi64config.sh /mnt/volumio/rootfs/root/init
 
 echo "Unmounting Temp devices"
 umount -l /mnt/volumio/rootfs/dev
 umount -l /mnt/volumio/rootfs/proc
 umount -l /mnt/volumio/rootfs/sys
 
-#echo "Copying LIRC configuration files"
-#sudo cp platform-pine64/pine64/etc/lirc/lircd.conf /mnt/volumio/rootfs/etc/lirc
-#sudo cp platform-pine64/pine64/etc/lirc/hardware.conf /mnt/volumio/rootfs/etc/lirc
-#sudo cp platform-pine64/pine64/etc/lirc/lircrc /mnt/volumio/rootfs/etc/lirc
-
-echo "==> soPine64/ Pine64 LTS device installed"
+echo "==> NanoPI64 device installed"
 
 #echo "Removing temporary platform files"
 #echo "(you can keep it safely as long as you're sure of no changes)"
-#sudo rm -r platform-pine64
+#sudo rm -r platform-nanopi
 sync
 
 echo "Preparing rootfs base for SquashFS"
@@ -172,19 +165,24 @@ fi
 echo "Copying Volumio rootfs to Temp Dir"
 cp -rp /mnt/volumio/rootfs/* /mnt/squash/
 
-if [ -e /mnt/kernel_current.tar ]; then
+if [ -e /mnt/kernel_current.tar.gz ]; then
 	echo "Volumio Kernel Partition Archive exists - Cleaning it"
-	rm -rf /mnt/kernel_current.tar
+	rm -rf /mnt/kernel_current.tar.gz
 fi
 
 echo "Creating Kernel Partition Archive"
-tar cf /mnt/kernel_current.tar --exclude='resize-volumio-datapart' -C /mnt/squash/boot/ .
+tar cf /mnt/kernel_current.tar.gz --exclude='resize-volumio-datapart' -C /mnt/squash/boot/ .
 
 echo "Removing the Kernel"
 rm -rf /mnt/squash/boot/*
 
 echo "Creating SquashFS, removing any previous one"
-rm -r Volumio.sqsh
+if [ -e Volumio.sqsh ]; then
+	echo "Volumio Kernel Partition Archive exists - Cleaning it"
+	rm -r Volumio.sqsh
+fi
+
+echo "Creating SquashFS"
 mksquashfs /mnt/squash/* Volumio.sqsh
 
 echo "Squash filesystem created"

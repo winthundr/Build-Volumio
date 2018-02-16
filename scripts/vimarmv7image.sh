@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Default build for Debian 32bit (to be changed to armv8)
+# Default build for Debian 32bit
 ARCH="armv7"
 
 while getopts ":v:p:a:" opt; do
@@ -98,6 +98,7 @@ echo "Creating mount point for the images partition"
 mkdir /mnt/volumio/images
 mount -t ext4 "${SYS_PART}" /mnt/volumio/images
 mkdir /mnt/volumio/rootfs
+echo "Creating mount point for the boot partition"
 mkdir /mnt/volumio/rootfs/boot
 mount -t vfat "${BOOT_PART}" /mnt/volumio/rootfs/boot
 
@@ -128,6 +129,11 @@ mount /proc /mnt/volumio/rootfs/proc -t proc
 mount /sys /mnt/volumio/rootfs/sys -t sysfs
 echo $PATCH > /mnt/volumio/rootfs/patch
 
+if [ -f "/mnt/volumio/rootfs/$PATCH/patch.sh" ] && [ -f "config.js" ]; then
+        echo "Starting config.js"
+        node config.js $PATCH
+fi
+
 echo "Creating s905_autoscript.txt"
 UUID_DATA=$(blkid -s UUID -o value ${DATA_PART})
 UUID_IMG=$(blkid -s UUID -o value ${SYS_PART})
@@ -143,7 +149,6 @@ EOF
 #cleanup
 rm /mnt/volumio/rootfs/vimarmv7config.sh
 rm /mnt/volumio/rootfs/root/init
-rm /mnt/volumio/rootfs/usr/local/sbin/mkinitramfs-custom.sh
 
 echo "Unmounting Temp devices"
 umount -l /mnt/volumio/rootfs/dev
@@ -154,7 +159,7 @@ echo "==> VIM device installed"
 
 #echo "Removing temporary platform files"
 #echo "(you can keep it safely as long as you're sure of no changes)"
-#sudo rm -r platform-aml
+#rm -r platform-aml
 sync
 
 echo "Preparing rootfs base for SquashFS"

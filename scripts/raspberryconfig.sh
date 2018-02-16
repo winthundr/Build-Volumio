@@ -55,7 +55,7 @@ sudo curl -L --output /usr/bin/rpi-update https://raw.githubusercontent.com/Hexx
 touch /boot/start.elf
 mkdir /lib/modules
 
-KERNEL_VERSION="4.9.51"
+KERNEL_VERSION="4.9.65"
 
 case $KERNEL_VERSION in
     "4.4.9")
@@ -63,9 +63,9 @@ case $KERNEL_VERSION in
       KERNEL_COMMIT="15ffab5493d74b12194e6bfc5bbb1c0f71140155"
       FIRMWARE_COMMIT="9108b7f712f78cbefe45891bfa852d9347989529"
       ;; 
-    "4.9.51")
-      KERNEL_REV="1036"
-      KERNEL_COMMIT="913eddd6d23f14ce34ae473a4c080c5c840ed583"
+    "4.9.65")
+      KERNEL_REV="1056"
+      KERNEL_COMMIT="e4b56bb7efe47319e9478cfc577647e51c48e909"
       FIRMWARE_COMMIT=$KERNEL_COMMIT
       ;; 
 esac
@@ -123,10 +123,11 @@ max_usb_current=1
 dtparam=audio=on
 audio_pwm_mode=2
 dtparam=i2c_arm=on
-disable_splash=1" >> /boot/config.txt
+disable_splash=1
+hdmi_force_hotplug=1" >> /boot/config.txt
 
 echo "Writing cmdline.txt file"
-echo "splash quiet plymouth.ignore-serial-consoles dwc_otg.lpm_enable=0 dwc_otg.fiq_enable=1 dwc_otg.fiq_fsm_enable=1 dwc_otg.fiq_fsm_mask=0x3 console=serial0,115200 kgdboc=serial0,115200 console=tty1 imgpart=/dev/mmcblk0p2 imgfile=/volumio_current.sqsh elevator=noop rootwait smsc95xx.turbo_mode=N bootdelay=5 logo.nologo vt.global_cursor_default=0 loglevel=0" >> /boot/cmdline.txt
+echo "splash quiet plymouth.ignore-serial-consoles dwc_otg.fiq_enable=1 dwc_otg.fiq_fsm_enable=1 dwc_otg.fiq_fsm_mask=0xF dwc_otg.nak_holdoff=1 console=serial0,115200 kgdboc=serial0,115200 console=tty1 imgpart=/dev/mmcblk0p2 imgfile=/volumio_current.sqsh elevator=noop rootwait bootdelay=5 logo.nologo vt.global_cursor_default=0 loglevel=0" >> /boot/cmdline.txt
 
 echo "adding gpio & spi group and permissions"
 groupadd -f --system gpio
@@ -171,66 +172,27 @@ ln -s /opt/vc/lib/libvcos.so /usr/lib/libvcos.so
 # changing external ethX priority rule for Pi as built-in eth _is_ on USB (smsc95xx driver)
 sed -i 's/KERNEL==\"eth/DRIVERS!=\"smsc95xx\", &/' /etc/udev/rules.d/99-Volumio-net.rules
 
-echo "Installing Wireless drivers for 8192eu, 8812au, 8188eu and mt7610. Many thanks mrengman"
-MRENGMAN_REPO="http://www.fars-robotics.net"
+echo "Installing Wireless drivers for 8188eu, 8192eu, 8812au, mt7610, and mt7612. Many thanks MrEngman"
+MRENGMAN_REPO="http://downloads.fars-robotics.net/wifi-drivers"
 mkdir wifi
 cd wifi
 
-echo "WIFI: 8192EU for armv7"
-wget $MRENGMAN_REPO/8192eu-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
-tar xf 8192eu-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
-sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'-v7+/' install.sh
-sh install.sh
-rm -rf *
+for DRIVER in 8188eu 8192eu 8812au mt7610 mt7612
+do
+  echo "WIFI: $DRIVER for armv7"
+  wget $MRENGMAN_REPO/$DRIVER-drivers/$DRIVER-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
+  tar xf $DRIVER-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
+  sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'-v7+/' install.sh
+  sh install.sh
+  rm -rf *
 
-echo "WIFI: 8192EU for armv6"
-wget $MRENGMAN_REPO/8192eu-$KERNEL_VERSION-$KERNEL_REV.tar.gz
-tar xf 8192eu-$KERNEL_VERSION-$KERNEL_REV.tar.gz
-sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'+/' install.sh
-sh install.sh
-rm -rf *
-
-echo "WIFI: 8812AU for armv7"
-wget $MRENGMAN_REPO/8812au-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
-tar xf 8812au-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
-sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'-v7+/' install.sh
-sh install.sh
-rm -rf *
-
-echo "WIFI: 8812AU for armv6"
-wget $MRENGMAN_REPO/8812au-$KERNEL_VERSION-$KERNEL_REV.tar.gz
-tar xf 8812au-$KERNEL_VERSION-$KERNEL_REV.tar.gz
-sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'+/' install.sh
-sh install.sh
-rm -rf *
-
-echo "WIFI: 8188EU for armv7"
-wget $MRENGMAN_REPO/8188eu-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
-tar xf 8188eu-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
-sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'-v7+/' install.sh
-sh install.sh
-rm -rf *
-
-echo "WIFI: 8188EU for armv6"
-wget $MRENGMAN_REPO/8188eu-$KERNEL_VERSION-$KERNEL_REV.tar.gz
-tar xf 8188eu-$KERNEL_VERSION-$KERNEL_REV.tar.gz
-sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'+/' install.sh
-sh install.sh
-rm -rf *
-
-echo "WIFI: MT7610 for armv7"
-wget $MRENGMAN_REPO/mt7610-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
-tar xf mt7610-$KERNEL_VERSION-v7-$KERNEL_REV.tar.gz
-sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'-v7+/' install.sh
-sh install.sh
-rm -rf *
-
-echo "WIFI: MT7610 for armv6"
-wget $MRENGMAN_REPO/mt7610-$KERNEL_VERSION-$KERNEL_REV.tar.gz
-tar xf mt7610-$KERNEL_VERSION-$KERNEL_REV.tar.gz
-sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'+/' install.sh
-sh install.sh
-rm -rf *
+  echo "WIFI: $DRIVER for armv6"
+  wget $MRENGMAN_REPO/$DRIVER-drivers/$DRIVER-$KERNEL_VERSION-$KERNEL_REV.tar.gz
+  tar xf $DRIVER-$KERNEL_VERSION-$KERNEL_REV.tar.gz
+  sed -i 's/^kernel=.*$/kernel='"$KERNEL_VERSION"'+/' install.sh
+  sh install.sh
+  rm -rf *
+done
 
 cd ..
 rm -rf wifi
@@ -247,6 +209,9 @@ if [ -f "patch.sh" ]; then
 sh patch.sh
 else
 echo "Cannot Find Patch File, aborting"
+fi
+if [ -f "install.sh" ]; then
+sh install.sh
 fi
 cd /
 rm -rf ${PATCH}
