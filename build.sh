@@ -307,9 +307,9 @@ case "$DEVICE" in
     check_os_release "armv7" "$VERSION" "$DEVICE"
     sh scripts/aml812armv7image.sh -v "$VERSION" -p "$PATCH" -a armv7
     ;;
-  vimarmv7) echo 'Writing Khadas VIM Image File'
+  aml9xxxarmv7) echo 'Writing AmlogicS9xxx Image File'
     check_os_release "armv7" "$VERSION" "$DEVICE"
-    sh scripts/vimarmv7image.sh -v "$VERSION" -p "$PATCH" -a armv7
+    sh scripts/aml9xxxarmv7image.sh -v "$VERSION" -p "$PATCH" -a armv7
     ;;
   vimarmv7-deb9) echo 'Writing Khadas VIM Image File'
     check_os_release "armv7-deb9" "$VERSION" "$DEVICE"

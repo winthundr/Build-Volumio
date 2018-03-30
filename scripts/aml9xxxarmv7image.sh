@@ -18,7 +18,7 @@ while getopts ":v:p:a:" opt; do
 done
 
 BUILDDATE=$(date -I)
-IMG_FILE="Volumio${VERSION}-${BUILDDATE}-vim-armv7.img"
+IMG_FILE="Volumio${VERSION}-${BUILDDATE}-aml9xxx-armv7.img"
 
 if [ "$ARCH" = arm ]; then
   DISTRO="Raspbian"
@@ -73,10 +73,10 @@ else
 #	cd ..
 fi
 
-echo "Copying the bootloader"
-dd if=platform-aml/s9xxx/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=1 count=442
-dd if=platform-aml/s9xxx/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=512 skip=1 seek=1
-sync
+#echo "Copying the bootloader"
+#dd if=platform-aml/s9xxx/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=1 count=442
+#dd if=platform-aml/s9xxx/uboot/u-boot.bin.sd.bin of=${LOOP_DEV} conv=fsync bs=512 skip=1 seek=1
+#sync
 
 echo "Preparing for Volumio rootfs"
 if [ -d /mnt ]
@@ -117,7 +117,7 @@ cp -pdR platform-aml/s9xxx/usr/* /mnt/volumio/rootfs/usr
 sync
 
 echo "Preparing to run chroot for more VIM configuration"
-cp scripts/vimarmv7config.sh /mnt/volumio/rootfs
+cp scripts/aml9xxxarmv7config.sh /mnt/volumio/rootfs
 cp scripts/initramfs/init.nextarm /mnt/volumio/rootfs/root/init
 #cp scripts/initramfs/init.next_nofs /mnt/volumio/rootfs/root/init
 cp scripts/initramfs/mkinitramfs-custom.sh /mnt/volumio/rootfs/usr/local/sbin
@@ -143,11 +143,11 @@ cat /mnt/volumio/rootfs/boot/txt/s905_autoscript.cmd >> /mnt/volumio/rootfs/boot
 
 chroot /mnt/volumio/rootfs /bin/bash -x <<'EOF'
 su -
-/vimarmv7config.sh
+/aml9xxxarmv7config.sh
 EOF
 
 #cleanup
-rm /mnt/volumio/rootfs/vimarmv7config.sh
+rm /mnt/volumio/rootfs/aml9xxxarmv7config.sh
 rm /mnt/volumio/rootfs/root/init
 
 echo "Unmounting Temp devices"
@@ -155,7 +155,7 @@ umount -l /mnt/volumio/rootfs/dev
 umount -l /mnt/volumio/rootfs/proc
 umount -l /mnt/volumio/rootfs/sys
 
-echo "==> VIM device installed"
+echo "==> Amlogic s9xxx device installed"
 
 #echo "Removing temporary platform files"
 #echo "(you can keep it safely as long as you're sure of no changes)"
