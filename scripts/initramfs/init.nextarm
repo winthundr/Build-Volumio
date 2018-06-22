@@ -15,6 +15,9 @@ mknod /dev/tty c 5 0
 
 mdev -s
 
+#######TODO: replace or delete the following when the restart issue for Tinkerboard has been solved
+echo 5 > /proc/sys/kernel/panic
+
 #Defaults which may be overridden by cmdline parameters
 USE_KMSG="yes"
 HWDEVICE="empty"
@@ -199,6 +202,8 @@ mount -t ext4 ${IMGPART} /mnt/imgpart
 #
 if [ ! -e "/mnt/imgpart/volumio_factory.sqsh" ]; then
   print_msg "Creating factory image, this will take a minute, please wait..."
+# TODO, ALLOW FOR INTERRUPTION IN FACTORY IMAGE CREATION
+# USE THE FILE APPROACH TO SIGNAL WHEN CREATION HAS BEEN EXECUTED CORRECTLY
   cp /mnt/imgpart/volumio_current.sqsh /mnt/imgpart/volumio_factory.sqsh
   print_msg "Factory image created"
   print_msg "Creating archive for factory kernel..."
@@ -208,6 +213,7 @@ if [ ! -e "/mnt/imgpart/volumio_factory.sqsh" ]; then
   cp /mnt/imgpart/kernel_current.tar /mnt/imgpart/kernel_factory.tar
   umount /mnt/factory
   rm -r /mnt/factory
+  sync
 elif [ ! -z "${BOOTDELAY}" ]; then
   print_msg "Doing a ${BOOTDELAY} second delay here to give kernel load a headstart"
   sleep ${BOOTDELAY}
@@ -276,8 +282,14 @@ if [ -e "/mnt/factory/factory_reset" ]; then
   print_msg "Executing factory reset"
   mkfs.ext4 -F -E stride=2,stripe-width=1024 -b 4096 ${DATAPART} -L volumio_data
   print_msg "Factory reset executed: part I - User DATA Part"
+  if [ -e "/mnt/imgpart/kernel_fallback.tar" ]; then
+     rm /mnt/imgpart/kernel_fallback.tar
+  fi
   tar xf /mnt/imgpart/kernel_factory.tar -C /mnt/factory
   print_msg "Factory reset executed: part II - Kernel"
+  if [ -e "/mnt/imgpart/volumio_fallback.sqsh" ]; then
+     rm /mnt/imgpart/volumio_fallback.sqsh
+  fi
   cp  /mnt/imgpart/volumio_factory.sqsh /mnt/imgpart/volumio_current.sqsh
   print_msg "Factory reset executed: part III - Squash"
   print_msg "Factory reset successfully executed"
@@ -286,6 +298,19 @@ if [ -e "/mnt/factory/factory_reset" ]; then
 
   umount /mnt/factory
   rm -r /mnt/factory
+
+# In case UUIDs are used: New data partition also means UUID has changed, fix it
+  if [ ! -z "${UUIDFMT}" ]; then
+    mkdir boot
+    mount -t vfat ${BOOTPART} /boot
+    UUID_DATA=$(blkid -s UUID -o value ${DATAPART})
+    cp $BOOTCONFIG $BOOTCONFIG.old
+    sed -i "s/datapart=UUID=[a-fA-F0-9]\{8\}-[A-Fa-f0-9]\{4\}-[A-Fa-f0-9]\{4\}-[A-Fa-f0-9]\{4\}-[A-Fa-f0-9]\{12\}/datapart=UUID=${UUID_DATA}/g" ${BOOTCONFIG}
+    rm /boot/resize-volumio-datapart
+    sync
+    umount /boot
+    rm -r /boot
+  fi
   print_msg "Restarting"
   echo b > /proc/sysrq-trigger
 fi
@@ -294,6 +319,18 @@ if [ -e "/mnt/factory/user_data" ]; then
   mkfs.ext4 -F -E stride=2,stripe-width=1024 -b 4096 ${DATAPART} -L volumio_data
   rm /mnt/factory/user_data
   print_msg "User Data successfully deleted "
+# In case UUIDs are used: New data partition also means UUID has changed, fix it
+  if [ ! -z "${UUIDFMT}" ]; then
+    mkdir boot
+    mount -t vfat ${BOOTPART} /boot
+    UUID_DATA=$(blkid -s UUID -o value ${DATAPART})
+    cp $BOOTCONFIG $BOOTCONFIG.old
+    sed -i "s/datapart=UUID=[a-fA-F0-9]\{8\}-[A-Fa-f0-9]\{4\}-[A-Fa-f0-9]\{4\}-[A-Fa-f0-9]\{4\}-[A-Fa-f0-9]\{12\}/datapart=UUID=${UUID_DATA}/g" ${BOOTCONFIG}
+    rm /boot/resize-volumio-datapart
+    sync
+    umount /boot
+    rm -r /boot
+  fi
 fi
 umount /mnt/factory
 rm -r /mnt/factory
@@ -345,16 +382,27 @@ if [ -e "/boot/kernel_update" ]; then
 fi
 
 # if data partition needs to be resized
-#mount -t auto /dev/${BOOTDEV}p1 /boot
 if [ -e "/boot/resize-volumio-datapart" ]; then
+  DATADEV=$(echo $DATAPART | grep -o mmcblk)
+  if [ ! -z "${DATADEV}" ]; then
+    DATADEV=$(echo ${DATAPART} | awk -F'/' '{print substr($3,0,7)}')
+  else
+    DATADEV=$(echo $DATAPART | grep -o sd)
+    if [ ! -z "${DATADEV}" ]; then
+	  DATADEV=$(echo ${DATAPART} | awk -F'/' '{print substr($3,0,3)}')
+    else
+      print_msg "Unexpected data device, DATAPART=${DATAPART}, aborting"
+	  exec sh
+    fi
+  fi
   print_msg "Re-sizing Volumio data partition"
-  END="$(parted -s /dev/${BOOTDEV} unit MB print free | grep Free | tail -1 | awk '{print $2}' | grep -o '[0-9]\+')"
-  parted -s /dev/${BOOTDEV} resizepart 3 ${END}
+  END="$(parted -s /dev/${DATADEV} unit MB print free | grep Free | tail -1 | awk '{print $2}' | grep -o '[0-9]\+')"
+  parted -s /dev/${DATADEV} resizepart 3 ${END}
   e2fsck -fy ${DATAPART}
   #force resize as we did just run e2fsck. Resize2fs seems ro not detect this occasionally
   resize2fs -f ${DATAPART}
   print_msg "Volumio data partition succesfully resized"
-  parted -s /dev/${BOOTDEV} unit MB print
+  parted -s /dev/${DATADEV} unit MB print
   rm /boot/resize-volumio-datapart
 fi
 
@@ -413,6 +461,9 @@ else
     print_msg "fstab entry updated to ${DEVFSTAB}"
   fi
 fi
+
+#######TODO: replace or delete the following when the restart issue for Tinkerboard has been solved
+echo 0 > /proc/sys/kernel/panic
 
 umount /proc
 umount /sys
