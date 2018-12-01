@@ -11,9 +11,30 @@ exit 101
 EOF
 chmod +x /usr/sbin/policy-rc.d
 
+echo "Configuring dpkg to not include Manual pages and docs"
+echo "path-exclude /usr/share/doc/*
+# we need to keep copyright files for legal reasons
+path-include /usr/share/doc/*/copyright
+path-exclude /usr/share/man/*
+path-exclude /usr/share/groff/*
+path-exclude /usr/share/info/*
+# lintian stuff is small, but really unnecessary
+path-exclude /usr/share/lintian/*
+path-exclude /usr/share/linda/*" > /etc/dpkg/dpkg.cfg.d/01_nodoc
+
+
 export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
 export LC_ALL=C LANGUAGE=C LANG=C
 /var/lib/dpkg/info/dash.preinst install
+
+#if [ $(uname -m) = i686 ] || [ $(uname -m) = x86 ] || [ $(uname -m) = x86_64 ]  ; then
+#  echo "Fix for cgmanager not starting on x86"
+#  sed -i -e 's/# Required-Start:    mountkernfs/# Required-Start:/g' /etc/init.d/cgmanager
+#  dpkg --configure --force-all cgmanager
+#  sed -i -e 's/# Required-Start:    mountkernfs/# Required-Start:/g' /etc/init.d/cgmanager
+#fi
+
+echo "Configuring packages"
 dpkg --configure -a
 
 # Reduce locales to just one beyond C.UTF-8
@@ -41,7 +62,7 @@ echo ""
 #Adding Main user Volumio
 echo "Adding Volumio User"
 groupadd volumio
-useradd -c volumio -d /home/volumio -m -g volumio -G adm,dialout,cdrom,floppy,audio,dip,video,plugdev,netdev -s /bin/bash -p '$6$tRtTtICB$Ki6z.DGyFRopSDJmLUcf3o2P2K8vr5QxRx5yk3lorDrWUhH64GKotIeYSNKefcniSVNcGHlFxZOqLM6xiDa.M.' volumio
+useradd -c volumio -d /home/volumio -m -g volumio -G adm,dialout,cdrom,floppy,audio,dip,video,plugdev,netdev,lp -s /bin/bash -p '$6$tRtTtICB$Ki6z.DGyFRopSDJmLUcf3o2P2K8vr5QxRx5yk3lorDrWUhH64GKotIeYSNKefcniSVNcGHlFxZOqLM6xiDa.M.' volumio
 
 #Setting Root Password
 echo 'root:$1$JVNbxLRo$pNn5AmZxwRtWZ.xF.8xUq/' | chpasswd -e
@@ -99,7 +120,7 @@ echo 'Adding Safe Sudoers NoPassw permissions'
 cat > ${SUDOERS_FILE} << EOF
 # Add permissions for volumio user
 volumio ALL=(ALL) ALL
-volumio ALL=(ALL) NOPASSWD: /sbin/poweroff,/sbin/shutdown,/sbin/reboot,/sbin/halt,/bin/systemctl,/usr/bin/apt-get,/usr/sbin/update-rc.d,/usr/bin/gpio,/bin/mount,/bin/umount,/sbin/iwconfig,/sbin/iwlist,/sbin/ifconfig,/usr/bin/killall,/bin/ip,/usr/sbin/service,/etc/init.d/netplug,/bin/journalctl,/bin/chmod,/sbin/ethtool,/usr/sbin/alsactl,/bin/tar,/usr/bin/dtoverlay,/sbin/dhclient,/usr/sbin/i2cdetect,/sbin/dhcpcd,/usr/bin/alsactl,/bin/mv,/sbin/iw,/bin/hostname,/sbin/modprobe,/sbin/iwgetid,/bin/ln,/usr/bin/unlink,/bin/dd,/usr/bin/dcfldd,/opt/vc/bin/vcgencmd
+volumio ALL=(ALL) NOPASSWD: /sbin/poweroff,/sbin/shutdown,/sbin/reboot,/sbin/halt,/bin/systemctl,/usr/bin/apt-get,/usr/sbin/update-rc.d,/usr/bin/gpio,/bin/mount,/bin/umount,/sbin/iwconfig,/sbin/iwlist,/sbin/ifconfig,/usr/bin/killall,/bin/ip,/usr/sbin/service,/etc/init.d/netplug,/bin/journalctl,/bin/chmod,/sbin/ethtool,/usr/sbin/alsactl,/bin/tar,/usr/bin/dtoverlay,/sbin/dhclient,/usr/sbin/i2cdetect,/sbin/dhcpcd,/usr/bin/alsactl,/bin/mv,/sbin/iw,/bin/hostname,/sbin/modprobe,/sbin/iwgetid,/bin/ln,/usr/bin/unlink,/bin/dd,/usr/bin/dcfldd,/opt/vc/bin/vcgencmd,/opt/vc/bin/tvservice,/usr/bin/renice,/bin/rm
 volumio ALL=(ALL) NOPASSWD: /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh, /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
 EOF
 chmod 0440 ${SUDOERS_FILE}
@@ -388,17 +409,6 @@ elif [ $(uname -m) = i686 ] || [ $(uname -m) = x86 ] || [ $(uname -m) = x86_64 ]
 
 fi
 
-echo "Installing Upmpdcli Streaming Modules"
-wget http://repo.volumio.org/Packages/Upmpdcli/upmpdcli-gmusic_1.2.12-1_all.deb
-wget http://repo.volumio.org/Packages/Upmpdcli/upmpdcli-qobuz_1.2.12-1_all.deb
-wget http://repo.volumio.org/Packages/Upmpdcli/upmpdcli-tidal_1.2.12-1_all.deb
-dpkg -i upmpdcli-gmusic_1.2.12-1_all.deb
-dpkg -i upmpdcli-qobuz_1.2.12-1_all.deb
-dpkg -i upmpdcli-tidal_1.2.12-1_all.deb
-rm /upmpdcli-gmusic_1.2.12-1_all.deb
-rm /upmpdcli-qobuz_1.2.12-1_all.deb
-rm /upmpdcli-tidal_1.2.12-1_all.deb
-
 echo "Creating Volumio Folder Structure"
 # Media Mount Folders
 mkdir /mnt/NAS
@@ -557,3 +567,24 @@ rm /etc/avahi/services/udisks.service
 echo "Setting CPU governor to performance"
 echo 'GOVERNOR="performance"' > /etc/default/cpufrequtils
 
+#####################
+#Multimedia Keys#-----------------------------------------
+#####################
+
+echo "Configuring xbindkeys"
+
+echo '"/usr/local/bin/volumio toggle"
+    XF86AudioPlay
+"/usr/local/bin/volumio previous"
+    XF86AudioPrev
+"/usr/local/bin/volumio next"
+    XF86AudioNext
+"/usr/local/bin/volumio volume toggle"
+    XF86AudioMute
+"/usr/local/bin/volumio volume minus"
+    XF86AudioLowerVolume
+"/usr/local/bin/volumio volume plus"
+    XF86AudioRaiseVolume' > /etc/xbindkeysrc
+
+echo "Enabling xbindkeys"
+ln -s /lib/systemd/system/xbindkeysrc.service /etc/systemd/system/multi-user.target.wants/xbindkeysrc.service
